@@ -11,8 +11,8 @@ ENCODING = 'UTF-8'
 CSV_DELIMITER = ','
 
 # _, input_name, model_name = sys.argv
-input_name = "ads.csv"
-model_name = "ads.adv"
+input_name = "user.csv"
+model_name = "user.adv"
 
 
 with codecs.open(input_name, 'r', encoding=ENCODING) as f:

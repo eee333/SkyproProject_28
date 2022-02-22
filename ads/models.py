@@ -16,10 +16,10 @@ class Category(models.Model):
 
 class Ad(models.Model):
     name = models.CharField(max_length=50)
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    price = models.DecimalField(max_digits=12, decimal_places=2)
     description = models.TextField(max_length=1000, null=True)
     is_published = models.BooleanField(default=False)
-    # image = models.ImageField(upload_to='media/', null=True)
+    image = models.ImageField(upload_to='media/', null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
 

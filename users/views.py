@@ -110,8 +110,11 @@ class UserListView(ListView):
                 "username": user.username,
                 "role": user.role,
                 "age": user.age,
-                "location": list(self.object.location.all().values_list("name", flat=True)),
+                # "locations": list(self.object.location.all().values_list("name", flat=True)),
+                "locations": [loc.name for loc in user.locations.all()],
             })
+
+        return JsonResponse(response, safe=False)
 
 
 class UserDetailView(DetailView):
@@ -127,7 +130,7 @@ class UserDetailView(DetailView):
             "username": user.username,
             "role": user.role,
             "age": user.age,
-            "location": list(self.object.location.all().values_list("name", flat=True)),
+            "locations": [loc.name for loc in user.locations.all()],
         })
 
 
@@ -160,7 +163,7 @@ class UserCreateView(CreateView):
 @method_decorator(csrf_exempt, name='dispatch')
 class UserUpdateView(UpdateView):
     model = User
-    fields = ["first_name", "last_name", "username", "password", "role", "age"]
+    fields = ["first_name", "last_name", "username", "password", "role", "age", "locations"]
 
     def post(self, request, *args, **kwargs):
         super().post(request, *args, **kwargs)
@@ -178,7 +181,7 @@ class UserUpdateView(UpdateView):
                 location_obj = Location.object.get(name=location)
             except Location.DoesNotExist:
                 return JsonResponse({"error": "Location not found"}, status=404)
-            self.object.location.add(location_obj)
+            self.object.locations.add(location_obj)
 
         self.object.save()
 
@@ -189,7 +192,7 @@ class UserUpdateView(UpdateView):
             "username": self.object.username,
             "role": self.object.role,
             "age": self.object.age,
-            "location": list(self.object.location.all().values_list("name", flat=True)),
+            "locations": [loc.name for loc in self.object.locations.all()],
         })
 
 
