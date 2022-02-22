@@ -99,41 +99,74 @@ class AdListView(ListView):
             response.append({
                 "id": ad.id,
                 "name": ad.name,
-                "author": ad.author,
                 "price": ad.price,
                 "description": ad.description,
-                "address": ad.address,
                 "is_published": ad.is_published,
+                "user": ad.user,
+                "category": ad.category,
             })
 
-        return JsonResponse(response, safe=False)
 
-    def post(self, request):
+@method_decorator(csrf_exempt, name='dispatch')
+class AdCreateView(CreateView):
+    model = Ad
+    fields = ["name", "price", "description", "user", "category"]
+
+    def post(self, request, *args, **kwargs):
         json_data = json.loads(request.body)
 
-        ad = Ad()
-        ad.name = json_data["name"]
-        ad.author = json_data["author"]
-        ad.price = json_data["price"]
-        ad.description = json_data["description"]
-        ad.address = json_data["address"]
-        ad.is_published = json_data["is_published"]
+        ad = Ad.objects.create(
+            name=json_data["name"],
+            price=json_data["price"],
+            description=json_data["description"],
+            user_id=json_data["user_id"],
+            category_id=json_data["category_id"],
+        )
 
-        try:
-            ad.full_clean()
-        except ValidationError as e:
-            return JsonResponse(e.message_dict, status=422)
-
-        ad.save()
         return JsonResponse({
             "id": ad.id,
             "name": ad.name,
-            "author": ad.author,
             "price": ad.price,
             "description": ad.description,
-            "address": ad.address,
             "is_published": ad.is_published,
+            "user_id": ad.user_id,
+            "category_id": ad.category_id,
         })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AdUpdateView(UpdateView):
+    model = Ad
+    fields = ["name", "price", "description", "category"]
+
+    def post(self, request, *args, **kwargs):
+        super().post(request, *args, **kwargs)
+        json_data = json.loads(request.body)
+
+        self.object.name = json_data["name"]
+        self.object.price = json_data["price"]
+        self.object.description = json_data["description"]
+        self.object.category_id = json_data["category_id"]
+        self.object.save()
+
+        return JsonResponse({
+            "id": self.object.id,
+            "name": self.object.name,
+            "price": self.object.price,
+            "description": self.object.description,
+            "category_id": self.object.category_id,
+        })
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class AdDeleteView(DeleteView):
+    model = Ad
+    success_url = "/"
+
+    def delete(self, request, *args, **kwargs):
+        super().delete(request, *args, **kwargs)
+
+        return JsonResponse({"status": "ok"}, status=200)
 
 
 class AdDetailView(DetailView):
