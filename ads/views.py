@@ -19,9 +19,8 @@ class CategoryListView(ListView):
 
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
-        categories = self.object_list
         response = []
-        for category in categories:
+        for category in self.object_list:
             response.append({
                 "id": category.id,
                 "name": category.name
@@ -93,24 +92,42 @@ class AdListView(ListView):
 
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
-        ads = self.object_list
         response = []
-        for ad in ads:
+        for ad in self.object_list:
             response.append({
                 "id": ad.id,
                 "name": ad.name,
                 "price": ad.price,
                 "description": ad.description,
                 "is_published": ad.is_published,
-                "user": ad.user,
                 "category": ad.category,
+                "user": ad.user,
             })
+
+        return JsonResponse(response, safe=False)
+
+
+class AdDetailView(DetailView):
+    model = Ad
+
+    def get(self, request, *args, **kwargs):
+        ad = self.get_object()
+
+        return JsonResponse({
+            "id": ad.id,
+            "name": ad.name,
+            "price": ad.price,
+            "description": ad.description,
+            "is_published": ad.is_published,
+            "category_id": ad.category_id,
+            "user_id": ad.user_id,
+        })
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AdCreateView(CreateView):
     model = Ad
-    fields = ["name", "price", "description", "user", "category"]
+    fields = ["name", "price", "description", "category", "user"]
 
     def post(self, request, *args, **kwargs):
         json_data = json.loads(request.body)
@@ -119,8 +136,8 @@ class AdCreateView(CreateView):
             name=json_data["name"],
             price=json_data["price"],
             description=json_data["description"],
-            user_id=json_data["user_id"],
             category_id=json_data["category_id"],
+            user_id=json_data["user_id"],
         )
 
         return JsonResponse({
@@ -129,15 +146,15 @@ class AdCreateView(CreateView):
             "price": ad.price,
             "description": ad.description,
             "is_published": ad.is_published,
-            "user_id": ad.user_id,
             "category_id": ad.category_id,
+            "user_id": ad.user_id,
         })
 
 
 @method_decorator(csrf_exempt, name='dispatch')
 class AdUpdateView(UpdateView):
     model = Ad
-    fields = ["name", "price", "description", "category"]
+    fields = ["name", "price", "description", "is_published", "category"]
 
     def post(self, request, *args, **kwargs):
         super().post(request, *args, **kwargs)
@@ -146,7 +163,9 @@ class AdUpdateView(UpdateView):
         self.object.name = json_data["name"]
         self.object.price = json_data["price"]
         self.object.description = json_data["description"]
+        self.object.is_published = json_data["is_published"]
         self.object.category_id = json_data["category_id"]
+
         self.object.save()
 
         return JsonResponse({
@@ -154,7 +173,9 @@ class AdUpdateView(UpdateView):
             "name": self.object.name,
             "price": self.object.price,
             "description": self.object.description,
+            "is_published": self.object.is_published,
             "category_id": self.object.category_id,
+            "user_id": self.object.user_id,
         })
 
 
@@ -167,20 +188,3 @@ class AdDeleteView(DeleteView):
         super().delete(request, *args, **kwargs)
 
         return JsonResponse({"status": "ok"}, status=200)
-
-
-class AdDetailView(DetailView):
-    model = Ad
-
-    def get(self, request, *args, **kwargs):
-        ad = self.get_object()
-
-        return JsonResponse({
-            "id": ad.id,
-            "name": ad.name,
-            "author": ad.author,
-            "price": ad.price,
-            "description": ad.description,
-            "address": ad.address,
-            "is_published": ad.is_published,
-        })
