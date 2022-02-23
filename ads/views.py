@@ -1,12 +1,14 @@
 import json
 
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from ads.models import Category, Ad
+from avito import settings
 
 
 def index(request):
@@ -94,9 +96,13 @@ class AdListView(ListView):
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
 
-        response = []
-        for ad in self.object_list.order_by("-price"):
-            response.append({
+        paginator = Paginator(self.object_list.order_by("-price"), settings.TOTAL_ON_PAGE)
+        page_number = int(request.GET.get("page", 1))
+        page_obj = paginator.get_page(page_number)
+
+        ad_list = []
+        for ad in page_obj:
+            ad_list.append({
                 "id": ad.id,
                 "name": ad.name,
                 "price": ad.price,
@@ -107,6 +113,11 @@ class AdListView(ListView):
                 "image": ad.image.url if ad.image else None,
             })
 
+        response = {
+            "items": ad_list,
+            "total": paginator.count,
+            "num_pages": paginator.num_pages,
+        }
         return JsonResponse(response, safe=False)
 
 
