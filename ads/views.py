@@ -102,6 +102,7 @@ class AdListView(ListView):
                 "is_published": ad.is_published,
                 "category_id": ad.category_id,
                 "user_id": ad.user_id,
+                "image": ad.image.url if ad.image else None,
             })
 
         return JsonResponse(response, safe=False)
@@ -121,6 +122,7 @@ class AdDetailView(DetailView):
             "is_published": ad.is_published,
             "category_id": ad.category_id,
             "user_id": ad.user_id,
+            "image": ad.image.url if ad.image else None,
         })
 
 
@@ -176,6 +178,7 @@ class AdUpdateView(UpdateView):
             "is_published": self.object.is_published,
             "category_id": self.object.category_id,
             "user_id": self.object.user_id,
+            "image": self.object.image.url if self.object.image else None,
         })
 
 

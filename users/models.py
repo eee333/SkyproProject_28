@@ -27,7 +27,6 @@ class User(models.Model):
     role = models.CharField(max_length=20, choices=ROLES, default="member")
     age = models.PositiveIntegerField()
     locations = models.ManyToManyField(Location)
-    # location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "Пользователь"

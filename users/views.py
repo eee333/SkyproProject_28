@@ -150,6 +150,13 @@ class UserCreateView(CreateView):
             age=json_data["age"],
         )
 
+        for location in json_data["locations"]:
+            try:
+                location_obj = Location.objects.get(id=location)
+            except Location.DoesNotExist:
+                return JsonResponse({"error": "Location not found"}, status=404)
+            user.locations.add(location_obj)
+
         return JsonResponse({
             "id": user.id,
             "first_name": user.first_name,
@@ -157,6 +164,7 @@ class UserCreateView(CreateView):
             "username": user.username,
             "role": user.role,
             "age": user.age,
+            "locations": [loc.name for loc in user.locations.all()],
         })
 
 
@@ -178,7 +186,7 @@ class UserUpdateView(UpdateView):
 
         for location in json_data["locations"]:
             try:
-                location_obj = Location.object.get(name=location)
+                location_obj = Location.objects.get(id=location)
             except Location.DoesNotExist:
                 return JsonResponse({"error": "Location not found"}, status=404)
             self.object.locations.add(location_obj)
