@@ -1,6 +1,7 @@
 import json
 
 from django.core.exceptions import ValidationError
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -103,7 +104,7 @@ class UserListView(ListView):
         super().get(request, *args, **kwargs)
 
         response = []
-        for user in self.object_list:
+        for user in self.object_list.annotate(ads=Count('ad', filter=Q(ad__is_published=True))):
             response.append({
                 "id": user.id,
                 "first_name": user.first_name,
@@ -111,8 +112,8 @@ class UserListView(ListView):
                 "username": user.username,
                 "role": user.role,
                 "age": user.age,
-                # "locations": list(self.object.location.all().values_list("name", flat=True)),
                 "locations": [loc.name for loc in user.locations.all()],
+                "total_ads": user.ads,
             })
 
         return JsonResponse(response, safe=False)
