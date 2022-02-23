@@ -101,6 +101,7 @@ class UserListView(ListView):
 
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
+
         response = []
         for user in self.object_list:
             response.append({
