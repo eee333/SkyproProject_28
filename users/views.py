@@ -60,7 +60,7 @@ class LocationCreateView(CreateView):
             "name": location.name,
             "lat": location.lat,
             "lng": location.lng,
-        })
+        }, status=201)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -68,13 +68,13 @@ class LocationUpdateView(UpdateView):
     model = Location
     fields = ["name", "lat", "lng"]
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         super().post(request, *args, **kwargs)
         json_data = json.loads(request.body)
 
         self.object.name = json_data["name"]
-        self.object.name = json_data["lat"]
-        self.object.name = json_data["lng"]
+        self.object.lat = json_data["lat"]
+        self.object.lng = json_data["lng"]
         self.object.save()
 
         return JsonResponse({
@@ -93,7 +93,7 @@ class LocationDeleteView(DeleteView):
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
 
-        return JsonResponse({"status": "ok"}, status=200)
+        return JsonResponse({"status": "ok"}, status=204)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -165,7 +165,7 @@ class UserCreateView(CreateView):
             "role": user.role,
             "age": user.age,
             "locations": [loc.name for loc in user.locations.all()],
-        })
+        }, status=201)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -173,7 +173,7 @@ class UserUpdateView(UpdateView):
     model = User
     fields = ["first_name", "last_name", "username", "password", "role", "age", "locations"]
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         super().post(request, *args, **kwargs)
         json_data = json.loads(request.body)
 
@@ -212,4 +212,4 @@ class UserDeleteView(DeleteView):
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
 
-        return JsonResponse({"status": "ok"}, status=200)
+        return JsonResponse({"status": "ok"}, status=204)

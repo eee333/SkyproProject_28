@@ -59,7 +59,7 @@ class CategoryCreateView(CreateView):
         return JsonResponse({
             "id": category.id,
             "name": category.name,
-        })
+        }, status=201)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -67,7 +67,7 @@ class CategoryUpdateView(UpdateView):
     model = Category
     fields = ["name"]
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         super().post(request, *args, **kwargs)
         json_data = json.loads(request.body)
 
@@ -88,7 +88,7 @@ class CategoryDeleteView(DeleteView):
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
 
-        return JsonResponse({"status": "ok"}, status=200)
+        return JsonResponse({"status": "ok"}, status=204)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -173,7 +173,7 @@ class AdCreateView(CreateView):
             "is_published": ad.is_published,
             "category_id": ad.category_id,
             "user_id": ad.user_id,
-        })
+        }, status=201)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -181,7 +181,7 @@ class AdUpdateView(UpdateView):
     model = Ad
     fields = ["name", "price", "description", "is_published", "category"]
 
-    def post(self, request, *args, **kwargs):
+    def put(self, request, *args, **kwargs):
         super().post(request, *args, **kwargs)
         json_data = json.loads(request.body)
 
@@ -213,7 +213,7 @@ class AdDeleteView(DeleteView):
     def delete(self, request, *args, **kwargs):
         super().delete(request, *args, **kwargs)
 
-        return JsonResponse({"status": "ok"}, status=200)
+        return JsonResponse({"status": "ok"}, status=204)
 
 
 @method_decorator(csrf_exempt, name='dispatch')
