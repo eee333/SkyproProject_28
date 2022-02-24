@@ -153,10 +153,8 @@ class UserCreateView(CreateView):
         )
 
         for location in json_data["locations"]:
-            try:
-                location_obj = Location.objects.get(id=location)
-            except Location.DoesNotExist:
-                return JsonResponse({"error": "Location not found"}, status=404)
+            location_obj, _ = Location.objects.get_or_create(name=location) # Назначаем локацию,
+            # либо создаем новую, если ее нет
             user.locations.add(location_obj)
 
         return JsonResponse({

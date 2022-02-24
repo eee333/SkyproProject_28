@@ -3,12 +3,14 @@ import json
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 from ads.models import Category, Ad
 from avito import settings
+from users.models import User
 
 
 def index(request):
@@ -96,7 +98,7 @@ class AdListView(ListView):
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
 
-        paginator = Paginator(self.object_list.order_by("-price"), settings.TOTAL_ON_PAGE)
+        paginator = Paginator(self.object_list.select_related("user").order_by("-price"), settings.TOTAL_ON_PAGE)
         page_number = int(request.GET.get("page", 1))
         page_obj = paginator.get_page(page_number)
 
@@ -110,6 +112,7 @@ class AdListView(ListView):
                 "is_published": ad.is_published,
                 "category_id": ad.category_id,
                 "user_id": ad.user_id,
+                "username": ad.user.username,
                 "image": ad.image.url if ad.image else None,
             })
 
@@ -147,13 +150,20 @@ class AdCreateView(CreateView):
     def post(self, request, *args, **kwargs):
         json_data = json.loads(request.body)
 
+        user_obj = get_object_or_404(User, pk=json_data["user_id"])  # Попытка достать юзера по id
+        # Если пользователя нет, то запись не будет создана
         ad = Ad.objects.create(
             name=json_data["name"],
             price=json_data["price"],
             description=json_data["description"],
-            category_id=json_data["category_id"],
-            user_id=json_data["user_id"],
         )
+
+        ad.category, _ = Category.objects.get_or_create(name=json_data["category"])  # Назначаем категорию,
+        # либо создаем новую, если ее нет
+
+        ad.user = user_obj
+
+        ad.save()
 
         return JsonResponse({
             "id": ad.id,
